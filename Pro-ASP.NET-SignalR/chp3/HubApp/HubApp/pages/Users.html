@@ -1,0 +1,115 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Users</title>
+    <link rel="stylesheet" href="../Content/bootstrap.min.css" />
+    <script src="/Scripts/jquery-3.4.1.js"></script>
+    <script src="/Scripts/jquery.signalR-2.4.1.js"></script>
+    <script src="/signalr/hubs" type="text/javascript"></script>
+    <script type="text/javascript">
+        const Users = [];
+
+        const userHub = $.connection.userHub;
+        userHub.client.newUser = user => {           
+            appendRow(user);
+            Users.push(user);          
+            $('#name').val('');
+			$('#city').val('');
+        };
+
+        userHub.client.removeUser = userId => {
+            const index = Users.findIndex(user => user.UserId == userId);
+            Users.splice(index, 1);
+			populateTable(Users);
+        }
+
+        $.connection.hub.start().done(() => {       
+            populateTable();
+
+            $('#addUser').on('click', () => {
+                const name = $('#name').val();
+                const city = $('#city').val();
+                if (!name || !city) {
+                    return false;
+				}
+                //userHub.server.addUser(name, city);
+                userHub.server.addUser({ Name: name, City: city });
+            });           
+        });
+
+        function appendRow(user) {
+            const row = `<tr>
+                            <td>${user.UserId}</td>
+                            <td>${user.Name}</td>
+                            <td>${user.City}</td>
+                            <td> 
+                               <span class="glyphicon glyphicon-trash" onclick="deleteUser(${user.UserId})"></span>
+                            </td>
+                        </tr>`;
+			$('#userTable').append(row);
+        }
+
+        function populateTable(initialUsers) {
+            $('#userTable').empty();
+			if (initialUsers) {
+				initialUsers.forEach(user => appendRow(user));
+                return;
+            }
+
+            userHub.server.getAllUsers().done(newUsers => {						
+				if (Array.isArray(newUsers)) {
+                    newUsers.forEach(usr => {
+                        Users.push(usr);
+                        appendRow(usr);
+                    });
+                }      	
+            });
+        }
+
+        function deleteUser(userId) {
+            userHub.server.deleteUser(userId).done(() => {
+                const index = Users.findIndex(user => user.UserId == userId);
+                Users.splice(index, 1);
+				populateTable(Users);
+            });
+		}
+    </script>
+</head>
+<body>
+   <div class="container" style="margin-top: 3em">
+       <div class="row">
+           <div class="col-sm-4">
+               <form>
+                   <h4>Add User</h4>
+                   <div class="form-group">
+                       <input id="name" placeholder="Name" class="form-control" autocomplete="off" />
+                   </div>
+                   <div class="form-group">
+                       <input id="city" placeholder="City" class="form-control" autocomplete="off" />
+                   </div>
+                   <div class="form-group">
+                       <input type="button" id="addUser" class="btn btn-primary form-control" value="Add" />
+                   </div>                                                      
+               </form>
+           </div>
+           <div class="col-sm-4 col-sm-offset-2">
+               <h4>User List</h4>
+               <table class="table table-bordered table-striped">
+                   <thead>
+                       <tr>
+                           <th>User ID</th>
+                           <th>Name</th>
+                           <th>City</th>
+                           <th></th>
+                       </tr>
+                   </thead>
+                   <tbody id="userTable">
+                       
+                   </tbody>
+               </table>
+           </div>
+       </div>
+   </div>
+</body>
+</html>

@@ -1,0 +1,32 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Cutomized Proxy Path</title>
+    <script src="/Scripts/jquery-3.4.1.js"></script>
+    <script src="/Scripts/jquery.signalR-2.4.1.js"></script>
+    <!--Not working-->
+    <script src="/custom-proxy-path/hubs" type="text/javascript"></script>
+    <script type="text/javascript">
+        $(function () {
+           var broadcaster = $.connection.helloHub;
+           broadcaster.client.displayText = function (text) {
+               $('#messages').append('<li>' + text + '</li>');
+           };
+		   $.connection.hub.url = '/custom-proxy-path'
+           $.connection.hub.start().then(function () {
+                $('#broadcast').click(function () {
+                    broadcaster.server.broadcastMessage($('#msg').val());
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div>
+        <input id="msg" />
+        <input type="button" id="broadcast" value="Broadcast" />
+        <ul id="messages"></ul>
+    </div>
+</body>
+</html>

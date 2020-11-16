@@ -1,0 +1,99 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Chat Forum</title>
+    <link rel="stylesheet" href="/Content/bootstrap.min.css" />
+    <style>
+        .col-sm-6 {
+            min-height: 100vh;
+        }     
+        #Group1, #Group2, #Group3 {
+            margin-top: 5px;
+            min-height: 98vh;
+        }
+    </style>
+    <script src="/Scripts/jquery-3.4.1.js"></script>
+    <script src="/Scripts/jquery.signalR-2.4.1.js"></script>
+    <script src="/signalr/hubs" type="text/javascript"></script>
+    <script type="text/javascript">
+        let GroupName;
+        const forumHub = $.connection.forumHub;
+        forumHub.client.newMessage = post => {
+            console.log('new message', post);
+			$(`#${post.GroupName}`).append(`<p><em>${post.Username}</em> ${post.Text}</p>`);           
+            $('#text').val('');
+        };
+
+        $.connection.hub.start()
+            .done(() => console.log('Connected to Hub'))
+            .catch(err => console.error('Hub Start', err));
+
+        function join(x) {
+            GroupName = `Group${x}`;
+            console.log('Joining group', GroupName);
+            forumHub.server.join(GroupName).done(() => {
+				$('#Group').text(`Connected to ${GroupName}`);
+                $('#join').slideUp();
+                $('#controls').slideDown();
+                const groups = ["Group1", "Group2", "Group3"];
+                groups.forEach(group => {
+                    $(`#${group}`).slideUp();
+                });
+                $(`#${GroupName}`).slideDown();
+            });
+        }
+
+        function leave() {
+            console.log('Leaving group', GroupName);
+			forumHub.server.leave(GroupName).done(() => {				
+				$('#join').slideDown();
+                $('#controls').slideUp();				
+            });
+        }
+
+        function send() {
+            const Username = $('#username').val();
+            const Text = $('#text').val();
+            if (!Username || !Text) {
+                return false;
+			}
+            const post = { Username, Text, GroupName };
+            forumHub.state.CustomClientName = "Web Browser";
+            forumHub.server.postMessage(post)
+                .done(() => console.log('message sent'))
+                .catch(err => console.error('Send', err));
+		}
+    </script>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-6 col-sm-offset-3" style="background: silver">
+                <h3>
+                    Room
+                    <small id="Group" style="color:white"></small>
+                </h3>
+                <p id="join">
+                    <button onclick="join(1)" class="btn btn-warning">Join Room 1</button>
+                    <button onclick="join(2)" class="btn btn-warning">Join Room 2</button>
+                    <button onclick="join(3)" class="btn btn-warning">Join Room 3</button>
+                </p>
+                <div id="controls" style="display:none">
+                    <p>
+                        <button onclick="leave()" class="btn btn-warning">Leave Room</button>
+                    </p>
+                    <form class="form-inline">
+                        <input class="form-control" id="username" placeholder="Username" autocomplete="off" />
+                        <input class="form-control" id="text" placeholder="Message" autocomplete="off" />
+                        <input type="button" class="btn btn-warning" value="Send" onclick="send()" />
+                    </form>
+                </div>
+                <div id="Group1" style="display:none" class="bg-primary"></div>
+                <div id="Group2" style="display:none" class="bg-success"></div>
+                <div id="Group3" style="display:none" class="bg-info"></div>
+            </div>            
+        </div>
+    </div>
+</body>
+</html>

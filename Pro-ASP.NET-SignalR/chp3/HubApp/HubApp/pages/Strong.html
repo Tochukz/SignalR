@@ -1,0 +1,28 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Strongly Typed Hub</title>
+    <script src="/Scripts/jquery-3.4.1.js"></script>
+    <script src="/Scripts/jquery.signalR-2.4.1.js"></script>
+    <script src="/signalr/hubs" type="text/javascript"></script>
+    <script type="text/javascript">
+        const strongHub = $.connection.strongHub;
+        strongHub.client.newMessage = msg => {
+            $('#messages').append(`<li>${msg}</li>`)
+        }
+        $.connection.hub.start().done(() => {
+            $('#send').on('click', () => {
+                strongHub.server.sendToAll($('#msg').val());
+            });
+        });
+    </script>
+</head>
+<body>
+    <div>
+        <input id="msg" />
+        <input type="submit" id="send" value="Send" />
+        <ul id="messages"></ul>
+    </div>
+</body>
+</html>

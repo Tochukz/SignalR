@@ -1,0 +1,48 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Progress</title>
+    <link rel="stylesheet" href="/Content/bootstrap.min.css" />
+    <script src="/Scripts/jquery-3.4.1.js"></script>
+    <script src="/Scripts/jquery.signalR-2.4.1.js"></script>
+    <script src="/signalr/hubs" type="text/javascript"></script>
+    <script type="text/javascript">
+        const progressHub = $.connection.progressHub;
+        $.connection.hub.start();
+        function download() {
+            $('#bar').slideDown();
+            progressHub.server
+                .download()
+				.progress(progress => {							
+					$('#status').text(`${progress} of 100`);
+					$('#progressBar').attr('style', `width: ${progress}%`);                    				                   
+                })
+                .done(response => {
+                    $('#status').text(response);                  
+					$('#progressBar').attr('style', "width: 100%");
+                })
+                .catch(err => console.error(err));
+		}
+    </script>
+</head>
+<body>
+    <div class="container" style="margin-top: 40vh">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="progress" style="display:none" id="bar">
+                    <div class="progress-bar" role="progressbar"  aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" id="progressBar"></div>
+                </div>
+                <div class="text-center">
+                    <span id="status"></span>
+                </div>
+            </div>
+            <div class="col-sm-4 col-sm-offset-4">
+                <div class="text-center">
+                    <button onclick="download()" class="btn btn-primary">Download</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

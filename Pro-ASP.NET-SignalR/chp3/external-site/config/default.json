@@ -1,0 +1,4 @@
+{
+    "port": 7500,
+    "signalRServer": "https://localhost:44359"
+}
