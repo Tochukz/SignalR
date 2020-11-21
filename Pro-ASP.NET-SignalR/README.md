@@ -69,3 +69,49 @@ __State Management__
 The data passed between client and server, in SignalR must be small, otherwise it might have a huge impact on the performance of your application.   
 
 ## Chapter 4: Developing SignalR Applications Using Persistent Connections    
+__What Is a Persistent Connection?__   
+A _persistent connection_ is a communication channel between a server and a client that is kept open to facilitate secure, robust, low-latency, and full-duplex communication.    
+
+__Properties of a Persistent Connection__  
+* Robust connection  
+* Full-duplex communication
+* Low latency  
+* Secure communication (optional)   
+
+__How Persistent Connection Works__  
+1. The client sends a negotiation request.  
+2. The server responds to the negotiation request with a  payload of negotiation properties.  
+3. The client uses the payload to negotiate the best transport option.  
+4. The client sends a connect request with the negotiated transport.  
+5. Once the server has accepted the connect request, the persistent connection is made.  
+After the connection is made, the following steps are taken simultaneously to keep maintaining the connection:  
+* Retrieve any data that is on the server
+* Send any data that is pending to be sent to the server    
+* Retrieve and acknowledge keep-alive packets or reconnect after polling timeout.  
+
+__Global Timeout and Keep-Alive Configurations__   
+__Connection Timeout__ is only applicable to long polling transport. It is the amount of time that a connection remains open without receiving data. After this timeout, the connection is closed, and another connection is opened. The default Connection Timeout is 110 seconds.   
+__Disconnect Timeout__ is the amount of time to wait after a connection goes away before raising the disconnect event. The default _DisconnectTimeout_ is 30 seconds.   
+__KeepAlive__ is the amount of time between the sending of keep-alive messages. It is set to 1/3 of the value of the _DisconnectTimeout_ by default, except for the long polling transport for which it is set to null which disables it.  
+It's minimum value is 2 seconds, and maximum value is 1/3 of the _DisconnectTimeout_.   
+
+__Relation Table of Key to Property of PersistentResponse JSON object__  
+
+Key | Property
+----|-----------
+C   | Cusors
+D   | Disconnect  
+T   | TimedOut  
+G   | GroupsToken
+L   | LongPollDelay  
+M   | Messages  
+
+Example of the Persistent Response Received on a Poll  
+```
+{"C":"d-C16EF02C-B,1|C,1|D,0","M":["User A: Hello"]}
+```
+
+__Group Persistence__  
+Persisting a group can be done either in-memory or to a long-term storage medium such as a database or a caching tier. The persistence mediums have trade-offs such as speed, durability, and scalability.  
+
+## Chapter 5: Troubleshooting ASP.NET SignalR Applications  

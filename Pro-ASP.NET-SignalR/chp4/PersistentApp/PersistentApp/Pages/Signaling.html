@@ -1,0 +1,121 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Signaling Persistent Connection</title>
+    <link rel="stylesheet" href="/Content/bootstrap.min.css" />
+    <style>
+		ul {
+			border: 1px solid black;
+			height: 60vh;
+			width: 100%;
+			overflow: scroll;
+			padding: 0;
+			list-style-type: none;
+		}
+    </style>
+    <script src="/Scripts/jquery-3.4.1.js"></script>
+    <script src="/Scripts/jquery.signalR-2.4.1.js"></script>
+    
+</head>
+<body>
+    <div class="container" style="margin-top: 2em">
+        <div class="row">
+            <div class="col-sm-6">
+                <p>
+                    <button id="btnConnect" class="btn btn-success">Connect</button>
+                    <button id="btnDisconnect" class="btn btn-danger" disabled>Disconnect</button>
+                </p>
+                <p>
+                    <label>Status: </label><span id="connectionStatus">Disconnected</span>
+                </p>
+                <ul id="messages"></ul>
+                <label>Name: </label>
+                <input id="name" value="Josh" />
+                <label>Message: </label>
+                <input id="message" autocomplete="off" />
+                <button id="btnSend" disabled class="btn btn-primary">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        const connection = $.connection('https://localhost:44391/SignalSocket');
+        connection.received(data => {
+            $('#messages').append(`<li>${data}</li>`);
+        });
+        connection.connectionSlow(data => {
+            console.log('connection slow', data);
+            $('#connectionStatus').text('Connection slowed');
+        });
+        connection.disconnected(() => {
+            console.log('Connection lost');
+            disableChat();
+        });
+        connection.error(err => {
+            console.error('Connection', err);
+        });
+        connection.reconnected(() => {
+            console.log('Connection restablished');
+            enableChat();
+        });
+        connection.reconnecting(() => {
+            console.log('Trying to reconnect');
+            disableChat();
+        });
+        connection.stateChanged(states => {
+            const oldState = states.oldState;
+            const newState = states.newState;
+            //console.log('states', $.connection.connectionState);
+            let connectionStatus = '';
+            switch (newState) {
+                case $.connection.connectionState.connected:
+                    connectionStatus = 'Connected';
+                    enableChat();
+                    break;
+                case $.connection.connectionState.connecting:
+                    connectionStatus = 'Connecting';
+                    break;
+                case $.connection.connectionState.reconnecting:
+                    connectionStatus = 'Reconnecting';
+                    break;
+                case $.connection.connectionState.disconnected:
+                    connectionStatus = 'Disconnected';
+                    break;
+                default:
+                    connectionStatus = newState;
+            }
+            $('#connectionStatus').text(connectionStatus);
+        });
+        connection.starting(() => {
+            console.log('Successful negotation request');
+        });
+        $('#btnSend').click(() => {
+            const name = $('#name').val();
+            const message = $('#message').val();
+            connection.send(`${name} : ${message}`);
+			$('#message').val('');
+        });
+        $('#btnConnect').click(() => {
+            console.log('Connecting...');
+            connection.start().done(data => console.log('Connection successful', data));
+        });
+        $('#btnDisconnect').click(() => {
+            console.log('Disconnecting...');
+            connection.stop();
+        });
+
+        function enableChat() {
+            $('#btnSend').removeAttr("disabled");
+            $("#btnDisconnect").removeAttr("disabled");
+            $("#btnConnect").attr("disabled", "disabled");
+        }
+
+        function disableChat() {
+            $('#btnSend').attr('disabled', 'disabled');
+            $('#btnDisconnect').attr('disabled', 'disabled');
+            $('#btnConnect').removeAttr('disabled');
+        }
+    </script>
+</body>
+</html>
