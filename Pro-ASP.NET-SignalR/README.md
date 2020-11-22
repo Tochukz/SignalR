@@ -115,3 +115,75 @@ __Group Persistence__
 Persisting a group can be done either in-memory or to a long-term storage medium such as a database or a caching tier. The persistence mediums have trade-offs such as speed, durability, and scalability.  
 
 ## Chapter 5: Troubleshooting ASP.NET SignalR Applications  
+[Chrome Dev Tool](https://developers.google.com/web/tools/chrome-devtools)     
+__Using Fiddler for Client-to-Server Communication Debugging__   
+_[Telerik Fiddler](https://www.telerik.com/fiddler)_, which has been a very handy tool for developers for many years, enables you to easily test and trace communication requests on different protocols on your machine.  
+_[Charles](https://www.charlesproxy.com/)_ is a good example of a similar tool for the Apple community.   
+
+__Tracing Features__     
+To enable Tracing add the following to you `Web.config` file:  
+```
+<system.diagnostics>
+  <trace autoflush="true" indentsize="4">
+    <listeners>
+      <add name="default_traces" type="System.Diagnostics.TextWriterTraceListener" initializeData="default_traces.txt" />
+    </listeners>
+  </trace>
+  <switches>
+    <add name="SignalRSwitch" value="All" />
+  </switches>
+  <sources>
+    <source name="Application" switchValue="All">
+      <listeners>
+        <add name="traces" />
+      </listeners>
+    </source>
+    <source name="Microsoft.Owin.Host.SystemWeb" switchValue="All">
+      <listeners>
+        <add name="traces" />
+      </listeners>
+    </source>
+    <source name="SignalR.Connection">
+      <listeners>
+        <add name="traces" />
+      </listeners>
+    </source>
+    <source name="SignalR.PersistentConnection">
+      <listeners>
+        <add name="traces" />  
+      </listeners>
+    </source>
+    <source name="SignalR.HubDispatcher">
+      <listeners>
+        <add name="traces" />
+      </listeners>
+    </source>
+    <source name="SignalR.Transports.WebSocketTransport">
+      <listeners>
+        <add name="traces" />
+      </listeners>
+    </source>
+    <source name="SignalR.Transports.ServerSentEventsTransport">
+      <listeners>
+        <add name="traces" />
+      </listeners>
+    </source>
+    <source name="SignalR.Transports.ForeverFrameTransport">
+      <listeners>
+        <add name="traces" />
+      </listeners>
+    </source>
+    <source name="SignalR.Transports.LongPollingTransport">
+      <listeners>
+        <add name="traces" />
+      </listeners>
+    </source>
+  </sources>
+  <sharedListeners>
+    <add name="traces" type="System.Diagnostics.TextWriterTraceListener" initializeData="server_traces.txt" />
+  </sharedListeners>
+</system.diagnostics>
+```  
+You do not need to use all the sources shown here.    
+
+## Chapter 6: An Overview of the Clients that Support SignalR   

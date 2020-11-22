@@ -1,0 +1,45 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Broadcast</title>
+    <link rel="stylesheet" href="/Content/bootstrap.min.css" />
+    <style>
+        ul {
+            border: 1px solid black;
+            height: 60vh;
+            width: 100%;
+            overflow: scroll;
+            padding: 0;
+            list-style-type: none;
+        }
+    </style>
+    <script src="/Scripts/jquery-3.4.1.js"></script>
+    <script src="/Scripts/jquery.signalR-2.4.1.js"></script>
+    <script src="/signalr/hubs" type="text/javascript"></script>
+    <script type="text/javascript">
+        const broadcastHub = $.connection.broadcastHub;
+        broadcastHub.client.sendMessage = message => {
+            $('#messages').append(`<li>${message}</li>`);
+        };
+        $.connection.hub.start().done(() => {
+            $('#send').click(() => {
+                const newMessage = $('#message').val();
+                broadcastHub.server.broadcast(newMessage);
+                $('#message').val('');
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container" style="margin: 2em">
+        <div class="row">
+            <div class="col-sm-4">
+                <ul id="messages"></ul>
+                <input id="message" autocomplete="off" />
+                <input type="button" id="send" value="Send" class="btn btn-primary" />
+            </div>
+        </div>       
+    </div>
+</body>
+</html>
