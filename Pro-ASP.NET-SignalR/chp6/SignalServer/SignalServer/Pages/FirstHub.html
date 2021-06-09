@@ -1,0 +1,24 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>First Hub</title>
+    <link rel="stylesheet" href="/Content/bootstrap.css" />
+    <script src="/Scripts/jquery-3.4.1.js"></script>
+    <script src="/Scripts/jquery.signalR-2.4.1.js"></script>
+    <script src="/signalr/hubs" type="text/javascript"></script>
+    <script type="text/javascript">
+        const connection = $.connection.firstHub;
+        connection.qs = { 'name': 'Chucks'};
+    </script>
+</head>
+<body>
+    <div class="container" style="margin-top: 2em">
+        <div class="row">
+            <div class="col-sm-4">
+                <input id="message" />
+            </div>
+        </div>
+    </div>
+</body>
+</html>
